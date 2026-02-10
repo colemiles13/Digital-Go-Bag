@@ -3,72 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Identity Go-Bag: Glass House Kit v4.0</title>
+    <title>Digital Identity Go-Bag: ULTIMATE EDITION</title>
     
-    <!-- 1. Load Tailwind CSS -->
+    <!-- 1. Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- 2. Load React & ReactDOM -->
+    <!-- 2. React Framework -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- 3. Load Babel for JSX support -->
+    <!-- 3. Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- 4. Custom Styles -->
+    <!-- 4. Google Fonts: Tech & Clean -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Rajdhani:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --neon-blue: #3b82f6;
+            --neon-cyan: #06b6d4;
+            --neon-purple: #8b5cf6;
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(10, 10, 15, 0.6);
+        }
 
         body {
-            font-family: 'Rajdhani', sans-serif;
-            background-color: #020617; /* Slate 950 */
-            color: #e2e8f0;
+            background-color: #050508;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
             overflow: hidden;
             user-select: none;
         }
 
         .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-        /* CRT Scanline & Vignette */
-        .crt-overlay {
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%;
+        /* CRT Scanline Overlay */
+        .scanlines {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.1) 50%,
+                rgba(0,0,0,0.1)
+            );
+            background-size: 100% 4px;
             pointer-events: none;
+            position: fixed;
+            inset: 0;
+            z-index: 40;
         }
-        
+
+        /* Vignette */
         .vignette {
-            background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
+            background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,1) 100%);
             pointer-events: none;
+            position: fixed;
+            inset: 0;
+            z-index: 30;
         }
-
-        /* 3D Tilt Card */
-        .tilt-card {
-            transform-style: preserve-3d;
-            transition: transform 0.1s ease-out;
-        }
-        
-        .tilt-content {
-            transform: translateZ(30px);
-        }
-        
-        .gloss-layer {
-            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
-            pointer-events: none;
-        }
-
-        /* Glitch Animations */
-        @keyframes glitch-skew {
-            0% { transform: skew(0deg); }
-            20% { transform: skew(-2deg); }
-            40% { transform: skew(2deg); }
-            60% { transform: skew(-1deg); }
-            80% { transform: skew(1deg); }
-            100% { transform: skew(0deg); }
-        }
-        .glitch-active { animation: glitch-skew 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite; }
 
         /* Canvas Background */
-        #canvas-bg {
+        #starfield {
             position: fixed;
             top: 0;
             left: 0;
@@ -77,553 +72,493 @@
             z-index: 0;
         }
 
+        /* 3D Tilt Effect Classes */
+        .card-container {
+            perspective: 1000px;
+        }
+        .card-3d {
+            transition: transform 0.1s ease-out;
+            transform-style: preserve-3d;
+        }
+        .card-content {
+            transform: translateZ(40px);
+        }
+        .card-bg {
+            transform: translateZ(0px);
+        }
+        
+        /* Glitch Animation */
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        .glitch-hover:hover {
+            animation: glitch 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+            color: var(--neon-cyan);
+        }
+
         /* Custom Scrollbar */
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 2px; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 2px; }
 
         /* Animations */
-        @keyframes pulse-ring {
-            0% { transform: scale(0.8); opacity: 0.5; }
-            100% { transform: scale(1.3); opacity: 0; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
-        .animate-pulse-ring { animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+
+        @keyframes scan-beam {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        .animate-scan { animation: scan-beam 2.5s ease-in-out infinite; }
     </style>
 </head>
 <body>
-    <canvas id="canvas-bg"></canvas>
-    <div id="root" class="relative z-10 h-screen w-screen"></div>
-    <div class="crt-overlay fixed inset-0 z-50 h-full w-full pointer-events-none opacity-50"></div>
-    <div class="vignette fixed inset-0 z-40 h-full w-full pointer-events-none"></div>
+    <canvas id="starfield"></canvas>
+    <div id="root"></div>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
 
-    <!-- AUDIO ENGINE SCRIPT -->
+    <!-- AUDIO SYSTEM -->
     <script>
-        // Simple synth for UI sounds using Web Audio API
-        const AudioEngine = {
+        const AudioSys = {
             ctx: null,
-            init: function() {
-                if (!this.ctx) {
-                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (this.ctx.state === 'suspended') {
-                    this.ctx.resume();
-                }
+            init() {
+                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (this.ctx.state === 'suspended') this.ctx.resume();
             },
-            playTone: function(freq, type, duration, vol = 0.1) {
+            play(type, freq, duration, vol = 0.1) {
                 if (!this.ctx) return;
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = type;
                 osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
                 gain.gain.setValueAtTime(vol, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
                 osc.connect(gain);
                 gain.connect(this.ctx.destination);
                 osc.start();
                 osc.stop(this.ctx.currentTime + duration);
             },
-            playHover: function() { this.playTone(400, 'sine', 0.1, 0.05); },
-            playClick: function() { this.playTone(800, 'square', 0.1, 0.05); },
-            playScan: function() { 
-                if (!this.ctx) return;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.frequency.setValueAtTime(200, this.ctx.currentTime);
-                osc.frequency.linearRampToValueAtTime(800, this.ctx.currentTime + 0.5);
-                gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.5);
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.5);
-            },
-            playSuccess: function() {
-                if (!this.ctx) return;
-                this.playTone(600, 'sine', 0.2, 0.1);
-                setTimeout(() => this.playTone(900, 'sine', 0.4, 0.1), 100);
+            hover() { this.play('sine', 400, 0.1, 0.05); },
+            click() { this.play('square', 800, 0.1, 0.05); },
+            type() { this.play('triangle', 1200 + Math.random()*200, 0.05, 0.02); },
+            success() { 
+                this.play('sine', 440, 0.2, 0.1); 
+                setTimeout(() => this.play('sine', 880, 0.4, 0.1), 100);
             }
         };
 
-        // Particle Network Background
-        const canvas = document.getElementById('canvas-bg');
+        // PARTICLES
+        const canvas = document.getElementById('starfield');
         const ctx = canvas.getContext('2d');
+        let width, height;
         let particles = [];
-        let mouse = { x: null, y: null };
 
         function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            initParticles();
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            particles = Array.from({ length: 80 }, () => ({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                size: Math.random() * 2,
+                speedX: (Math.random() - 0.5) * 0.5,
+                speedY: (Math.random() - 0.5) * 0.5
+            }));
         }
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = (Math.random() - 0.5) * 0.5;
-                this.size = Math.random() * 2 + 1;
-                this.color = `rgba(59, 130, 246, ${Math.random() * 0.5})`; // Blue tint
-            }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
-                
-                // Mouse repulsion
-                if(mouse.x != null) {
-                    let dx = mouse.x - this.x;
-                    let dy = mouse.y - this.y;
-                    let distance = Math.sqrt(dx*dx + dy*dy);
-                    if (distance < 150) {
-                        const forceDirectionX = dx / distance;
-                        const forceDirectionY = dy / distance;
-                        const force = (150 - distance) / 150;
-                        const directionX = forceDirectionX * force * 2;
-                        const directionY = forceDirectionY * force * 2;
-                        this.x -= directionX;
-                        this.y -= directionY;
-                    }
-                }
-            }
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        function initParticles() {
-            particles = [];
-            const particleCount = Math.min(window.innerWidth / 10, 100); // Responsive count
-            for (let i = 0; i < particleCount; i++) {
-                particles.push(new Particle());
-            }
-        }
-
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // Draw connections
-            for (let a = 0; a < particles.length; a++) {
-                for (let b = a; b < particles.length; b++) {
-                    let dx = particles[a].x - particles[b].x;
-                    let dy = particles[a].y - particles[b].y;
-                    let distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < 150) {
-                        ctx.strokeStyle = `rgba(59, 130, 246, ${1 - distance/150})`;
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(particles[a].x, particles[a].y);
-                        ctx.lineTo(particles[b].x, particles[b].y);
-                        ctx.stroke();
-                    }
-                }
-                particles[a].update();
-                particles[a].draw();
-            }
-            requestAnimationFrame(animateParticles);
-        }
-
         window.addEventListener('resize', resize);
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = e.x;
-            mouse.y = e.y;
-        });
         resize();
-        animateParticles();
+
+        let mouse = { x: -1000, y: -1000 };
+        window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+        function animate() {
+            ctx.fillStyle = '#050508';
+            ctx.fillRect(0, 0, width, height);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = 'rgba(59, 130, 246, 0.2)';
+
+            particles.forEach(p => {
+                p.x += p.speedX;
+                p.y += p.speedY;
+                if (p.x < 0) p.x = width;
+                if (p.x > width) p.x = 0;
+                if (p.y < 0) p.y = height;
+                if (p.y > height) p.y = 0;
+
+                const dx = mouse.x - p.x;
+                const dy = mouse.y - p.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 200) {
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.stroke();
+                }
+                
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
     </script>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- ICONS ---
-        // Using standard SVG paths for better compatibility
+        // --- ICONS (SVG) ---
         const Icons = {
-            Shield: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
-            Bell: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>,
-            Eraser: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>,
-            AlertTriangle: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>,
-            Activity: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+            Shield: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>,
+            Eye: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>,
+            Eraser: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>,
+            Alert: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+            Zap: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+            Check: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+            Fingerprint: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 10a2 2 0 0 0-2 2c0 1.07.93 2 1.9 2.5 1.15.6 2.07 1.48 2.3 2.5"/><path d="M15 13.5c.5-1 .75-2.17.75-3.5a4.75 4.75 0 0 0-4.75-4.75c-1.84 0-3.4 1-4.14 2.5"/><path d="M19.9 14.5a8 8 0 0 0-1.8-4.9C16.8 7.7 14.5 6.5 12 6.5c-2.3 0-4.4 1-6 2.8a8 8 0 0 0-1.5 5.2"/><path d="M7.75 16.5c-.75-1.5-1-3.25-1-4.75a6.25 6.25 0 0 1 12.5 0c0 1.25-.25 2.5-1 4"/><path d="M16 19.5c.5-.9 1-2.2 1-3.5a3.75 3.75 0 0 0-7.5 0c0 1.25.5 2.6 1 3.5"/></svg>,
+            Lock: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
             ChevronRight: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>,
-            ChevronLeft: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>,
-            Lock: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
-            Fingerprint: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 10a2 2 0 0 0-2 2c0 1.07.93 2 1.9 2.5 1.15.6 2.07 1.48 2.3 2.5"/><path d="M15 13.5c.5-1 .75-2.17.75-3.5a4.75 4.75 0 0 0-4.75-4.75c-1.84 0-3.4 1-4.14 2.5"/><path d="M19.9 14.5a8 8 0 0 0-1.8-4.9C16.8 7.7 14.5 6.5 12 6.5c-2.3 0-4.4 1-6 2.8a8 8 0 0 0-1.5 5.2"/><path d="M7.75 16.5c-.75-1.5-1-3.25-1-4.75a6.25 6.25 0 0 1 12.5 0c0 1.25-.25 2.5-1 4"/><path d="M16 19.5c.5-.9 1-2.2 1-3.5a3.75 3.75 0 0 0-7.5 0c0 1.25.5 2.6 1 3.5"/></svg>,
-            Speaker: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>,
-            SpeakerOff: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M23 9l-6 6"/></svg>,
-            Check: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            ChevronLeft: (p) => <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         };
 
         // --- COMPONENTS ---
 
-        // 1. Cyber Button
-        const CyberButton = ({ children, onClick, disabled, className = "", variant = "primary" }) => {
-            const handleMouseEnter = () => !disabled && AudioEngine.playHover();
-            const handleClick = (e) => {
-                if (!disabled) {
-                    AudioEngine.playClick();
-                    if (onClick) onClick(e);
-                }
-            };
-
-            const styles = {
-                primary: "bg-blue-600 hover:bg-blue-500 border-blue-400 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]",
-                secondary: "bg-slate-800 hover:bg-slate-700 border-slate-600 text-slate-300 hover:text-white"
-            };
-
-            return (
-                <button 
-                    onClick={handleClick}
-                    onMouseEnter={handleMouseEnter}
-                    disabled={disabled}
-                    className={`
-                        relative px-8 py-3 rounded-lg font-bold tracking-widest uppercase transition-all duration-200 border
-                        disabled:opacity-50 disabled:cursor-not-allowed disabled:grayscale
-                        group overflow-hidden
-                        ${styles[variant]}
-                        ${className}
-                    `}
-                >
-                    <span className="relative z-10 flex items-center justify-center gap-2">{children}</span>
-                    {/* Hover Glint */}
-                    <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent z-0"></div>
-                </button>
-            );
-        };
-
-        // 2. 3D Tilt Card
-        const TiltCard = ({ children, color }) => {
+        // 1. 3D Tilt Card Component
+        const TiltCard = ({ children, glowColor }) => {
             const cardRef = useRef(null);
-            
-            const handleMouseMove = (e) => {
+
+            const handleMove = (e) => {
                 const card = cardRef.current;
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                
                 const centerX = rect.width / 2;
                 const centerY = rect.height / 2;
                 
-                const rotateX = (centerY - y) / 12;
-                const rotateY = (x - centerX) / 12;
-                
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+                // Calculate rotation (Max 15deg)
+                const rotateX = ((centerY - y) / centerY) * 15;
+                const rotateY = ((x - centerX) / centerX) * 15;
+
+                card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
             };
 
-            const handleMouseLeave = () => {
-                if(cardRef.current) {
-                    cardRef.current.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
-                }
+            const handleLeave = () => {
+                if(cardRef.current) cardRef.current.style.transform = `rotateX(0) rotateY(0) scale(1)`;
             };
 
             return (
-                <div 
-                    ref={cardRef}
-                    className="tilt-card relative w-full aspect-square max-w-[320px] mx-auto flex items-center justify-center cursor-pointer group"
-                    onMouseMove={handleMouseMove}
-                    onMouseLeave={handleMouseLeave}
-                    onMouseEnter={() => AudioEngine.playHover()}
-                >
-                    <div className="absolute inset-0 bg-slate-900/40 rounded-3xl border border-white/10 backdrop-blur-sm"></div>
-                    {/* Dynamic colored glow based on prop */}
-                    <div className={`absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-xl ${color.replace('text', 'bg')}`}></div>
-                    
-                    <div className="relative z-10 tilt-content">
-                        {children}
+                <div className="card-container w-full max-w-sm aspect-square">
+                    <div 
+                        ref={cardRef}
+                        className="card-3d relative w-full h-full rounded-2xl cursor-pointer"
+                        onMouseMove={handleMove}
+                        onMouseLeave={handleLeave}
+                        onMouseEnter={() => AudioSys.hover()}
+                    >
+                        {/* Background with Glass Effect */}
+                        <div className={`card-bg absolute inset-0 bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl ${glowColor}`}></div>
+                        
+                        {/* 3D Content */}
+                        <div className="card-content absolute inset-0 flex items-center justify-center">
+                            {children}
+                        </div>
+
+                        {/* Gloss Reflection */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-2xl pointer-events-none mix-blend-overlay"></div>
                     </div>
-                    
-                    {/* Gloss layer */}
-                    <div className="gloss-layer absolute inset-0 rounded-3xl opacity-50"></div>
                 </div>
             );
         };
 
-        // 3. Typewriter Text
-        const Typewriter = ({ text, speed = 20, onComplete }) => {
-            const [displayed, setDisplayed] = useState('');
-            const index = useRef(0);
-
+        // 2. Typewriter Effect Component
+        const Typewriter = ({ text, onComplete }) => {
+            const [display, setDisplay] = useState('');
+            
             useEffect(() => {
-                setDisplayed('');
-                index.current = 0;
-                
+                setDisplay('');
+                let i = 0;
                 const timer = setInterval(() => {
-                    if (index.current < text.length) {
-                        setDisplayed((prev) => prev + text.charAt(index.current));
-                        index.current++;
-                        // Random typing sound texture (skip some frames so it's not machine-gun)
-                        if (index.current % 3 === 0) AudioEngine.playTone(800 + Math.random()*200, 'square', 0.01, 0.01);
+                    if (i < text.length) {
+                        setDisplay(prev => prev + text.charAt(i));
+                        i++;
+                        if(i % 3 === 0) AudioSys.type(); // Sound every 3rd char
                     } else {
                         clearInterval(timer);
-                        if (onComplete) onComplete();
+                        if(onComplete) onComplete();
                     }
-                }, speed);
-                
+                }, 20); // Speed
                 return () => clearInterval(timer);
             }, [text]);
 
-            return <span className="text-slate-200 leading-relaxed">{displayed}<span className="animate-pulse text-blue-400 font-bold">_</span></span>;
+            return <span className="leading-relaxed">{display}<span className="animate-pulse text-blue-400 font-bold">_</span></span>;
         };
 
-        // --- MAIN APPLICATION ---
+        // 3. Cyber Button Component
+        const Button = ({ children, onClick, disabled, primary = false }) => {
+            return (
+                <button 
+                    onClick={(e) => { if(!disabled) { AudioSys.click(); onClick(e); } }}
+                    onMouseEnter={() => !disabled && AudioSys.hover()}
+                    disabled={disabled}
+                    className={`
+                        group relative px-8 py-3 rounded font-mono text-sm tracking-widest uppercase transition-all duration-300
+                        ${disabled ? 'opacity-30 cursor-not-allowed' : 'hover:-translate-y-1 hover:shadow-lg'}
+                        ${primary 
+                            ? 'bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)] border border-blue-400' 
+                            : 'bg-slate-900/50 text-slate-400 border border-slate-700 hover:text-white hover:border-white/50'}
+                    `}
+                >
+                    <span className="relative z-10 flex items-center gap-2">{children}</span>
+                    {primary && <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>}
+                </button>
+            );
+        };
+
+        // --- MAIN APP ---
         const App = () => {
-            const [view, setView] = useState('intro'); // intro, boot, mission, outro
-            const [currentSlide, setCurrentSlide] = useState(0);
+            const [phase, setPhase] = useState('LOCKSCREEN'); // LOCKSCREEN -> BOOT -> DASHBOARD -> DEBRIEF
+            const [slideIndex, setSlideIndex] = useState(0);
             const [inventory, setInventory] = useState([]);
-            const [soundEnabled, setSoundEnabled] = useState(true);
-            const [bootLog, setBootLog] = useState([]);
+            const [bootText, setBootText] = useState([]);
 
             const items = [
                 {
                     id: 1,
                     category: "Privacy Shield",
                     name: "Mirrored Shades",
-                    icon: <Icons.Shield className="w-24 h-24" />,
-                    desc: "Mirrored sunglasses allow you to observe the world while hiding your intent. In the digital realm, this symbolizes managing your settings to see without being tracked.",
+                    icon: <Icons.Shield className="w-32 h-32" />,
+                    desc: "Mirrored sunglasses allow you to see out while blocking others from seeing in. In the digital world, this represents curating your settings to observe the internet without letting algorithms track your every move.",
                     color: "text-cyan-400",
-                    glow: "shadow-cyan-500/50"
+                    glow: "shadow-cyan-500/20"
                 },
                 {
                     id: 2,
                     category: "Alert System",
                     name: "Toy Canary",
-                    icon: <Icons.Bell className="w-24 h-24" />,
-                    desc: "Miners used canaries to detect toxic air. This represents your ability to notice small digital 'glitches'—weird emails, slow performance—before a hack occurs.",
+                    icon: <Icons.Eye className="w-32 h-32" />,
+                    desc: "Miners used canaries to detect toxic air. This represents your ability to notice small digital 'glitches'—weird emails, slow performance—before a toxic security breach occurs.",
                     color: "text-yellow-400",
-                    glow: "shadow-yellow-500/50"
+                    glow: "shadow-yellow-500/20"
                 },
                 {
                     id: 3,
                     category: "Cleanup Tool",
                     name: "White-Out Fluid",
-                    icon: <Icons.Eraser className="w-24 h-24" />,
-                    desc: "White-Out covers mistakes, but the texture remains. Digitally, 'deleting' something hides it from view, but the data persists on servers forever.",
+                    icon: <Icons.Eraser className="w-32 h-32" />,
+                    desc: "White-Out covers mistakes, but the texture remains. Digitally, 'deleting' something hides it from view, but the data persists on servers, backups, and screenshots forever.",
                     color: "text-white",
-                    glow: "shadow-white/50"
+                    glow: "shadow-white/20"
                 },
                 {
                     id: 4,
                     category: "False Security",
                     name: "Screen Mesh",
-                    icon: <Icons.AlertTriangle className="w-24 h-24" />,
-                    desc: "MYTH: 'Incognito Mode hides me.' Like a screen door, it keeps history out of your browser, but your ISP and websites can see right through it.",
+                    icon: <Icons.Alert className="w-32 h-32" />,
+                    desc: "MYTH: 'Incognito Mode hides me.' Like a screen door, it keeps history out of your browser, but your ISP, school, and websites can see right through the mesh.",
                     color: "text-orange-500",
-                    glow: "shadow-orange-500/50",
-                    isHazard: true
+                    glow: "shadow-orange-500/20",
+                    hazard: true
                 },
                 {
                     id: 5,
                     category: "Resilience",
                     name: "Superball",
-                    icon: <Icons.Activity className="w-24 h-24" />,
-                    desc: "Glass shatters; a superball bounces back. When compromised, don't panic. Reset, report, and recover. Resilience is your ultimate defense.",
+                    icon: <Icons.Zap className="w-32 h-32" />,
+                    desc: "Glass shatters when dropped. A superball bounces back. When you face a leak, hack, or cyberbullying, don't shatter. Reset passwords, report the threat, and bounce back higher.",
                     color: "text-emerald-400",
-                    glow: "shadow-emerald-500/50"
+                    glow: "shadow-emerald-500/20"
                 }
             ];
 
-            const toggleSound = () => setSoundEnabled(!soundEnabled);
-
-            const startBootSequence = () => {
-                AudioEngine.init(); // Initialize Audio Context
-                AudioEngine.playScan();
-                setView('boot');
+            const startSystem = () => {
+                AudioSys.init();
+                AudioSys.play('triangle', 200, 0.5);
+                setPhase('BOOT');
                 
-                const logs = [
-                    "BIOMETRIC SCAN COMPLETE...",
-                    "IDENTITY VERIFIED: GROUP 01",
-                    "LOADING ENCRYPTION KEYS...",
-                    "ESTABLISHING SECURE CONNECTION...",
+                const sequence = [
+                    "INITIALIZING NEURAL LINK...",
+                    "VERIFYING BIOMETRICS...",
+                    "DECRYPTING ASSETS...",
+                    "ESTABLISHING SECURE TUNNEL...",
                     "ACCESS GRANTED."
                 ];
-                
+
                 let delay = 0;
-                logs.forEach((log, i) => {
-                    delay += 800;
+                sequence.forEach((line, i) => {
                     setTimeout(() => {
-                        setBootLog(prev => [...prev, log]);
-                        AudioEngine.playTone(1000 + (i*100), 'sine', 0.1, 0.05);
+                        setBootText(p => [...p, line]);
+                        AudioSys.click();
                     }, delay);
+                    delay += 800;
                 });
 
-                setTimeout(() => {
-                    setView('mission');
-                    AudioEngine.playSuccess();
-                }, delay + 1000);
+                setTimeout(() => setPhase('DASHBOARD'), delay + 500);
             };
 
             const nextSlide = () => {
-                if (currentSlide < items.length - 1) {
-                    // Add to inventory
-                    if (!inventory.includes(items[currentSlide].id)) {
-                        setInventory([...inventory, items[currentSlide].id]);
-                        AudioEngine.playSuccess();
-                    }
-                    setCurrentSlide(prev => prev + 1);
+                const currentItem = items[slideIndex];
+                if(!inventory.includes(currentItem.id)) {
+                    setInventory(p => [...p, currentItem.id]);
+                    AudioSys.success();
+                }
+
+                if (slideIndex < items.length - 1) {
+                    setSlideIndex(p => p + 1);
                 } else {
-                    // Final add
-                    if (!inventory.includes(items[currentSlide].id)) {
-                        setInventory([...inventory, items[currentSlide].id]);
-                    }
-                    setView('outro');
+                    setPhase('DEBRIEF');
                 }
             };
 
-            const prevSlide = () => {
-                if (currentSlide > 0) setCurrentSlide(prev => prev - 1);
-            };
+            // --- RENDERERS ---
 
-            // --- VIEWS ---
-
-            // 1. INTRO VIEW
-            if (view === 'intro') {
+            if (phase === 'LOCKSCREEN') {
                 return (
-                    <div className="h-full w-full flex flex-col items-center justify-center p-8 text-center relative z-20">
-                        <div className="mb-8 relative group cursor-pointer" onClick={startBootSequence}>
-                            <div className="absolute inset-0 bg-blue-500 rounded-full blur-[50px] opacity-20 animate-pulse"></div>
-                            <div className="relative bg-slate-900/80 p-12 rounded-full border border-blue-500/30 ring-1 ring-blue-500/20 group-hover:scale-105 transition-transform duration-500">
-                                <Icons.Fingerprint className="w-24 h-24 text-blue-400 group-hover:text-blue-200 transition-colors" />
+                    <div className="h-screen w-full flex flex-col items-center justify-center relative z-20">
+                        <div 
+                            onClick={startSystem}
+                            className="group relative cursor-pointer mb-8"
+                        >
+                            <div className="absolute inset-0 bg-blue-500 rounded-full blur-[60px] opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
+                            <div className="relative w-32 h-32 rounded-full border border-blue-500/30 flex items-center justify-center bg-slate-900/50 backdrop-blur-md group-hover:scale-105 transition-transform duration-300">
+                                <Icons.Fingerprint className="w-16 h-16 text-blue-400 animate-pulse" />
                             </div>
-                            <div className="absolute top-0 left-0 w-full h-full rounded-full border-t border-blue-400 animate-[spin_4s_linear_infinite]"></div>
-                            <div className="absolute -inset-4 border border-dashed border-blue-500/20 rounded-full animate-[spin_10s_linear_infinite_reverse]"></div>
-                            <div className="absolute bottom-[-40px] left-1/2 -translate-x-1/2 text-blue-400 text-xs tracking-[0.3em] font-mono animate-pulse">
-                                CLICK TO SCAN
-                            </div>
+                            <div className="absolute inset-0 border-t-2 border-blue-400 rounded-full animate-spin"></div>
                         </div>
-
-                        <h1 className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-600 mb-6">
+                        <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-500 mb-4">
                             GLASS HOUSE
                         </h1>
-                        <p className="text-slate-400 max-w-lg mx-auto text-lg mb-8 font-light leading-relaxed">
-                            Tactical Digital Identity Defense Kit.<br/>
-                            <span className="text-blue-500 font-mono text-sm">v4.0 // NEURAL EDITION</span>
-                        </p>
-
-                        <div className="absolute bottom-8 right-8">
-                           <button onClick={toggleSound} className="text-slate-500 hover:text-white transition-colors">
-                               {soundEnabled ? <Icons.Speaker className="w-6 h-6" /> : <Icons.SpeakerOff className="w-6 h-6" />}
-                           </button>
-                        </div>
+                        <p className="font-mono text-blue-400 text-sm tracking-[0.5em] animate-pulse">SYSTEM LOCKED</p>
+                        <p className="text-slate-500 text-xs mt-8">CLICK TO SCAN BIOMETRICS</p>
                     </div>
                 );
             }
 
-            // 2. BOOT VIEW
-            if (view === 'boot') {
+            if (phase === 'BOOT') {
                 return (
-                    <div className="h-full w-full flex flex-col items-center justify-center font-mono text-sm z-20 relative">
-                        <div className="w-full max-w-md bg-slate-900/90 border border-blue-500/30 p-6 rounded-lg shadow-2xl">
-                            <div className="flex items-center gap-2 mb-4 border-b border-blue-500/20 pb-2">
-                                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                                <span className="ml-auto text-xs text-blue-500">TERMINAL_ACCESS</span>
+                    <div className="h-screen w-full flex flex-col items-center justify-center relative z-20 font-mono text-sm">
+                        <div className="w-full max-w-md bg-slate-900/80 border border-blue-500/20 rounded p-6 shadow-2xl backdrop-blur-md">
+                            <div className="flex gap-2 mb-4 border-b border-blue-500/20 pb-2">
+                                <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                                <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                                <div className="w-2 h-2 rounded-full bg-green-500"></div>
                             </div>
-                            <div className="space-y-2">
-                                {bootLog.map((log, i) => (
-                                    <div key={i} className="text-blue-400 flex">
-                                        <span className="opacity-50 mr-3">0{i+1}</span>
-                                        <span className="animate-pulse">{log}</span>
+                            <div className="space-y-2 h-40">
+                                {bootText.map((line, i) => (
+                                    <div key={i} className="text-blue-400">
+                                        <span className="opacity-50 mr-2">{`0${i+1}`}</span>
+                                        {line}
                                     </div>
                                 ))}
-                            </div>
-                            <div className="mt-4 h-1 bg-slate-800 rounded overflow-hidden">
-                                <div className="h-full bg-blue-500 transition-all duration-300" style={{width: `${(bootLog.length / 5) * 100}%`}}></div>
+                                <div className="h-4 w-2 bg-blue-500 animate-pulse"></div>
                             </div>
                         </div>
                     </div>
                 );
             }
 
-            // 3. MISSION VIEW (SLIDES)
-            if (view === 'mission') {
-                const item = items[currentSlide];
+            if (phase === 'DASHBOARD') {
+                const item = items[slideIndex];
                 return (
-                    <div className="h-full w-full flex flex-col relative z-20">
+                    <div className="h-screen w-full flex flex-col relative z-20">
                         {/* Header */}
-                        <header className="h-16 flex items-center justify-between px-6 bg-slate-900/40 backdrop-blur-md border-b border-white/5">
-                            <div className="flex items-center gap-4">
-                                <Icons.Lock className="w-5 h-5 text-blue-400" />
-                                <span className="font-mono text-xs text-slate-400 tracking-widest">SECURE_CHANNEL</span>
+                        <header className="h-20 flex items-center justify-between px-8 border-b border-white/5 bg-slate-900/20 backdrop-blur-sm">
+                            <div className="flex items-center gap-2">
+                                <Icons.Lock className="w-5 h-5 text-emerald-400" />
+                                <span className="font-mono text-xs text-slate-400 tracking-widest">ENCRYPTED CONNECTION</span>
                             </div>
                             <div className="flex gap-1">
                                 {items.map((_, i) => (
-                                    <div key={i} className={`h-1 w-8 rounded-full transition-all duration-500 ${i === currentSlide ? 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]' : 'bg-slate-800'}`}></div>
+                                    <div key={i} className={`h-1 w-8 rounded-full transition-all duration-300 ${i === slideIndex ? 'bg-blue-500 shadow-[0_0_10px_#3b82f6]' : 'bg-slate-800'}`}></div>
                                 ))}
                             </div>
                         </header>
 
-                        {/* Main Content */}
-                        <main className="flex-grow flex items-center justify-center p-4">
-                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full max-w-6xl items-center">
+                        {/* Main Stage */}
+                        <main className="flex-grow flex items-center justify-center p-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 w-full max-w-6xl items-center">
                                 
-                                {/* 3D Object (Left) */}
-                                <div className="lg:col-span-5 flex flex-col items-center">
-                                    <TiltCard color={item.color}>
-                                        <div className={`p-8 ${item.color} drop-shadow-[0_0_30px_rgba(0,0,0,0.5)]`}>
-                                            {item.icon}
-                                        </div>
-                                    </TiltCard>
-                                    <div className="mt-8 text-center">
-                                        <h2 className={`text-5xl font-black uppercase tracking-tighter ${item.color} drop-shadow-md`}>
+                                {/* Left: 3D Visualization */}
+                                <div className="flex flex-col items-center justify-center order-2 lg:order-1">
+                                    <div className="relative">
+                                        <div className={`absolute inset-0 blur-[80px] opacity-20 rounded-full ${item.color.replace('text', 'bg')}`}></div>
+                                        <TiltCard glowColor={item.glow}>
+                                            <div className={`${item.color} drop-shadow-[0_0_15px_rgba(0,0,0,0.5)]`}>
+                                                {item.icon}
+                                            </div>
+                                        </TiltCard>
+                                    </div>
+                                    <div className="mt-10 text-center">
+                                        <h2 className="text-5xl font-black text-white uppercase tracking-tighter mb-2 glitch-hover cursor-default">
                                             {item.name}
                                         </h2>
-                                        <div className="font-mono text-xs text-slate-500 tracking-[0.5em] mt-2">
-                                            ARTIFACT 0{item.id}
+                                        <div className={`font-mono text-xs tracking-[0.4em] ${item.color} opacity-80`}>
+                                            ARTIFACT_ID_0{item.id}
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Data Panel (Right) */}
-                                <div className="lg:col-span-7">
-                                    <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 p-8 rounded-2xl relative overflow-hidden">
-                                        {/* Decorative elements */}
-                                        <div className="absolute top-0 right-0 p-4 opacity-10">
-                                            <Icons.Activity className="w-32 h-32" />
-                                        </div>
+                                {/* Right: Intel Panel */}
+                                <div className="order-1 lg:order-2">
+                                    <div className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-8 relative overflow-hidden shadow-2xl">
+                                        {/* Hazard Strip */}
+                                        {item.hazard && <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-red-600 animate-pulse"></div>}
                                         
-                                        <div className="flex items-center gap-3 mb-6 relative z-10">
-                                            <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-widest border rounded bg-slate-950 ${item.color.replace('text', 'border')}`}>
+                                        <div className="flex items-center justify-between mb-6">
+                                            <span className={`px-2 py-1 rounded border text-[10px] font-bold uppercase tracking-widest bg-slate-950 ${item.color.replace('text', 'border')} ${item.color}`}>
                                                 {item.category}
                                             </span>
-                                            {item.isHazard && (
-                                                <span className="flex items-center gap-1 text-[10px] text-red-500 font-bold uppercase tracking-widest animate-pulse">
-                                                    <Icons.AlertTriangle className="w-3 h-3" /> Warning
-                                                </span>
+                                            {item.hazard && (
+                                                <div className="flex items-center gap-1 text-orange-500 text-xs font-bold uppercase tracking-widest animate-pulse">
+                                                    <Icons.Alert className="w-4 h-4" /> Threat Detected
+                                                </div>
                                             )}
                                         </div>
 
-                                        <div className="h-32 md:h-24 relative z-10">
-                                            <Typewriter key={currentSlide} text={item.desc} speed={15} />
+                                        <div className="h-40 md:h-32 text-lg text-slate-300 font-light mb-8">
+                                            <Typewriter key={slideIndex} text={item.desc} />
                                         </div>
-                                        
-                                        {/* Controls */}
-                                        <div className="mt-8 flex gap-4 border-t border-white/5 pt-6">
-                                            <CyberButton onClick={prevSlide} disabled={currentSlide === 0} variant="secondary">
-                                                <Icons.ChevronLeft className="w-4 h-4" /> Prev
-                                            </CyberButton>
-                                            <CyberButton onClick={nextSlide}>
-                                                {currentSlide === items.length - 1 ? "Finish" : "Next"} <Icons.ChevronRight className="w-4 h-4" />
-                                            </CyberButton>
+
+                                        <div className="flex gap-4 border-t border-white/5 pt-6">
+                                            <Button 
+                                                disabled={slideIndex === 0} 
+                                                onClick={() => setSlideIndex(p => p - 1)}
+                                            >
+                                                <Icons.ChevronLeft className="w-4 h-4" /> Back
+                                            </Button>
+                                            <Button 
+                                                primary 
+                                                onClick={nextSlide}
+                                            >
+                                                {slideIndex === items.length - 1 ? "Complete Mission" : "Acquire"} <Icons.ChevronRight className="w-4 h-4" />
+                                            </Button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </main>
 
-                        {/* Inventory Dock */}
-                        <footer className="h-24 flex items-center justify-center pb-4 px-4">
-                            <div className="bg-slate-900/80 backdrop-blur-lg border border-slate-700 rounded-2xl px-6 py-3 flex items-center gap-4 shadow-2xl relative">
-                                <span className="absolute -top-3 left-6 bg-slate-900 text-[10px] text-slate-400 px-2 border border-slate-700 rounded">INVENTORY</span>
-                                {items.map((it) => (
+                        {/* Footer: Inventory Dock */}
+                        <footer className="h-24 flex items-center justify-center">
+                            <div className="bg-slate-900/80 backdrop-blur-lg border border-slate-700 px-6 py-3 rounded-2xl flex gap-4 shadow-2xl relative">
+                                <span className="absolute -top-3 left-4 bg-slate-900 text-slate-500 text-[10px] px-2 rounded border border-slate-700">INVENTORY</span>
+                                {items.map(it => (
                                     <div 
                                         key={it.id} 
-                                        className={`
-                                            w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-500 border
+                                        className={`w-12 h-12 rounded border flex items-center justify-center transition-all duration-500
                                             ${inventory.includes(it.id) 
-                                                ? `bg-slate-800 ${it.color.replace('text', 'border')} ${it.color} shadow-[0_0_15px_rgba(0,0,0,0.5)] scale-100` 
-                                                : 'bg-slate-950 border-slate-800 text-slate-800 scale-90 opacity-50'}
+                                                ? `bg-slate-800 border-blue-500 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)] scale-100` 
+                                                : `bg-slate-950 border-slate-800 text-slate-800 scale-90`}
                                         `}
                                     >
                                         <div className="w-6 h-6">{it.icon}</div>
@@ -635,32 +570,42 @@
                 );
             }
 
-            // 4. OUTRO VIEW
-            if (view === 'outro') {
+            if (phase === 'DEBRIEF') {
                 return (
-                    <div className="h-full w-full flex flex-col items-center justify-center p-8 z-20 relative">
-                        <div className="max-w-2xl w-full bg-slate-900/80 backdrop-blur-xl border border-emerald-500/30 p-10 rounded-3xl text-center relative overflow-hidden animate-[pulse-ring_4s_infinite]">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
+                    <div className="h-screen w-full flex flex-col items-center justify-center relative z-20 px-4">
+                        <div className="max-w-3xl w-full bg-slate-900/90 backdrop-blur-xl border border-emerald-500/30 p-12 rounded-3xl text-center relative shadow-2xl animate-float">
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-cyan-500"></div>
                             
-                            <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/50">
-                                <Icons.Check className="w-10 h-10 text-emerald-400" />
+                            <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                                <Icons.Check className="w-12 h-12 text-emerald-400" />
                             </div>
 
-                            <h2 className="text-4xl font-black text-white mb-6">MISSION ACCOMPLISHED</h2>
-                            
-                            <p className="text-2xl font-serif italic text-slate-300 mb-8">
-                                "If it is free, you are the product.<br/>If it is digital, it is permanent."
-                            </p>
+                            <h2 className="text-4xl md:text-5xl font-black text-white mb-8 tracking-tight">
+                                MISSION SUCCESS
+                            </h2>
 
-                            <div className="grid grid-cols-5 gap-4 mb-8 max-w-md mx-auto">
+                            {/* THE QUOTE - NO FADE, NO ANIMATION LOOP, JUST SOLID VISIBILITY */}
+                            <div className="bg-black/40 p-8 rounded-xl border-l-4 border-emerald-500 mb-8">
+                                <p className="text-3xl md:text-4xl font-serif italic text-white leading-relaxed drop-shadow-md">
+                                    "If it is free, you are the product.<br/>If it is digital, it is permanent."
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-5 gap-2 max-w-sm mx-auto mb-10 opacity-80">
                                 {items.map(it => (
-                                    <div key={it.id} className="aspect-square bg-slate-800 rounded border border-slate-700 flex items-center justify-center text-emerald-500">
-                                        <div className="w-6 h-6">{it.icon}</div>
+                                    <div key={it.id} className="aspect-square bg-slate-800 rounded flex items-center justify-center border border-slate-700 text-emerald-500">
+                                        <div className="w-5 h-5">{it.icon}</div>
                                     </div>
                                 ))}
                             </div>
 
-                            <CyberButton onClick={() => setView('intro')}>REBOOT SYSTEM</CyberButton>
+                            <Button onClick={() => {
+                                setInventory([]);
+                                setSlideIndex(0);
+                                setPhase('LOCKSCREEN');
+                            }}>
+                                SYSTEM REBOOT
+                            </Button>
                         </div>
                     </div>
                 );
