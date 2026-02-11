@@ -17,7 +17,7 @@
 
     <!-- 4. Google Fonts: Tech & Clean -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
 
         :root {
             --neon-blue: #3b82f6;
@@ -301,7 +301,7 @@
                 return () => clearInterval(timer);
             }, [text]);
 
-            return <span className="leading-relaxed">{display}<span className="animate-pulse text-blue-400 font-bold">_</span></span>;
+            return <span className="leading-relaxed tracking-wide">{display}<span className="animate-pulse text-blue-400 font-bold">_</span></span>;
         };
 
         // 3. Cyber Button Component
@@ -337,7 +337,7 @@
                     id: 1,
                     category: "Privacy Shield",
                     name: "Mirrored Shades",
-                    icon: <Icons.Shield className="w-32 h-32" />,
+                    Icon: Icons.Shield,
                     desc: "Mirrored sunglasses allow you to see out while blocking others from seeing in. In the digital world, this represents curating your settings to observe the internet without letting algorithms track your every move.",
                     color: "text-cyan-400",
                     glow: "shadow-cyan-500/20"
@@ -346,7 +346,7 @@
                     id: 2,
                     category: "Alert System",
                     name: "Toy Canary",
-                    icon: <Icons.Eye className="w-32 h-32" />,
+                    Icon: Icons.Eye,
                     desc: "Miners used canaries to detect toxic air. This represents your ability to notice small digital 'glitches'—weird emails, slow performance—before a toxic security breach occurs.",
                     color: "text-yellow-400",
                     glow: "shadow-yellow-500/20"
@@ -355,7 +355,7 @@
                     id: 3,
                     category: "Cleanup Tool",
                     name: "White-Out Fluid",
-                    icon: <Icons.Eraser className="w-32 h-32" />,
+                    Icon: Icons.Eraser,
                     desc: "White-Out covers mistakes, but the texture remains. Digitally, 'deleting' something hides it from view, but the data persists on servers, backups, and screenshots forever.",
                     color: "text-white",
                     glow: "shadow-white/20"
@@ -364,7 +364,7 @@
                     id: 4,
                     category: "False Security",
                     name: "Screen Mesh",
-                    icon: <Icons.Alert className="w-32 h-32" />,
+                    Icon: Icons.Alert,
                     desc: "MYTH: 'Incognito Mode hides me.' Like a screen door, it keeps history out of your browser, but your ISP, school, and websites can see right through the mesh.",
                     color: "text-orange-500",
                     glow: "shadow-orange-500/20",
@@ -374,7 +374,7 @@
                     id: 5,
                     category: "Resilience",
                     name: "Superball",
-                    icon: <Icons.Zap className="w-32 h-32" />,
+                    Icon: Icons.Zap,
                     desc: "Glass shatters when dropped. A superball bounces back. When you face a leak, hack, or cyberbullying, don't shatter. Reset passwords, report the threat, and bounce back higher.",
                     color: "text-emerald-400",
                     glow: "shadow-emerald-500/20"
@@ -408,6 +408,8 @@
 
             const nextSlide = () => {
                 const currentItem = items[slideIndex];
+                
+                // Add to inventory logic
                 if(!inventory.includes(currentItem.id)) {
                     setInventory(p => [...p, currentItem.id]);
                     AudioSys.success();
@@ -435,7 +437,8 @@
                             </div>
                             <div className="absolute inset-0 border-t-2 border-blue-400 rounded-full animate-spin"></div>
                         </div>
-                        <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-500 mb-4">
+                        {/* WIDEST tracking ensures GL A SS isn't read as G ASS */}
+                        <h1 className="text-6xl md:text-8xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-500 mb-4">
                             GLASS HOUSE
                         </h1>
                         <p className="font-mono text-blue-400 text-sm tracking-[0.5em] animate-pulse">SYSTEM LOCKED</p>
@@ -494,12 +497,13 @@
                                         <div className={`absolute inset-0 blur-[80px] opacity-20 rounded-full ${item.color.replace('text', 'bg')}`}></div>
                                         <TiltCard glowColor={item.glow}>
                                             <div className={`${item.color} drop-shadow-[0_0_15px_rgba(0,0,0,0.5)]`}>
-                                                {item.icon}
+                                                <item.Icon className="w-32 h-32" />
                                             </div>
                                         </TiltCard>
                                     </div>
                                     <div className="mt-10 text-center">
-                                        <h2 className="text-5xl font-black text-white uppercase tracking-tighter mb-2 glitch-hover cursor-default">
+                                        {/* Fixed tracking-tighter to tracking-widest to prevent letter merging */}
+                                        <h2 className="text-5xl font-black text-white uppercase tracking-widest mb-2 glitch-hover cursor-default">
                                             {item.name}
                                         </h2>
                                         <div className={`font-mono text-xs tracking-[0.4em] ${item.color} opacity-80`}>
@@ -525,7 +529,8 @@
                                             )}
                                         </div>
 
-                                        <div className="h-40 md:h-32 text-lg text-slate-300 font-light mb-8">
+                                        {/* Font Normal and Tracking Wide to prevent thin letter disappearance */}
+                                        <div className="h-40 md:h-32 text-lg text-slate-200 font-normal tracking-wide mb-8">
                                             <Typewriter key={slideIndex} text={item.desc} />
                                         </div>
 
@@ -555,13 +560,13 @@
                                 {items.map(it => (
                                     <div 
                                         key={it.id} 
-                                        className={`w-12 h-12 rounded border flex items-center justify-center transition-all duration-500
+                                        className={`w-12 h-12 rounded border flex items-center justify-center transition-all duration-500 p-2
                                             ${inventory.includes(it.id) 
-                                                ? `bg-slate-800 border-blue-500 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)] scale-100` 
+                                                ? `bg-slate-800 border-slate-600 ${it.color} shadow-[0_0_15px_rgba(255,255,255,0.1)] scale-100` 
                                                 : `bg-slate-950 border-slate-800 text-slate-800 scale-90`}
                                         `}
                                     >
-                                        <div className="w-6 h-6">{it.icon}</div>
+                                        <it.Icon className="w-full h-full drop-shadow-sm" />
                                     </div>
                                 ))}
                             </div>
@@ -580,21 +585,21 @@
                                 <Icons.Check className="w-12 h-12 text-emerald-400" />
                             </div>
 
-                            <h2 className="text-4xl md:text-5xl font-black text-white mb-8 tracking-tight">
+                            <h2 className="text-4xl md:text-5xl font-black text-white mb-8 tracking-widest">
                                 MISSION SUCCESS
                             </h2>
 
                             {/* THE QUOTE - NO FADE, NO ANIMATION LOOP, JUST SOLID VISIBILITY */}
                             <div className="bg-black/40 p-8 rounded-xl border-l-4 border-emerald-500 mb-8">
-                                <p className="text-3xl md:text-4xl font-serif italic text-white leading-relaxed drop-shadow-md">
+                                <p className="text-3xl md:text-4xl font-serif italic text-white leading-relaxed drop-shadow-md tracking-wide">
                                     "If it is free, you are the product.<br/>If it is digital, it is permanent."
                                 </p>
                             </div>
 
-                            <div className="grid grid-cols-5 gap-2 max-w-sm mx-auto mb-10 opacity-80">
+                            <div className="grid grid-cols-5 gap-2 max-w-sm mx-auto mb-10 opacity-100">
                                 {items.map(it => (
-                                    <div key={it.id} className="aspect-square bg-slate-800 rounded flex items-center justify-center border border-slate-700 text-emerald-500">
-                                        <div className="w-5 h-5">{it.icon}</div>
+                                    <div key={it.id} className={`aspect-square bg-slate-800 rounded flex items-center justify-center border border-slate-700 ${it.color} shadow-[0_0_10px_rgba(0,0,0,0.5)] p-2`}>
+                                        <it.Icon className="w-full h-full drop-shadow-md" />
                                     </div>
                                 ))}
                             </div>
